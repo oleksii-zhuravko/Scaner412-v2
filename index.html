@@ -114,13 +114,13 @@ textarea{
   user-select:text;font-family:monospace;
 }
 
-/* ── Buttons row below textarea ── */
-.actions{flex-shrink:0;display:flex;gap:8px;}
+/* ── Buttons column below textarea ── */
+.actions{flex-shrink:0;display:flex;flex-direction:column;gap:8px;}
 .btn{
-  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;
-  flex:1;height:54px;border-radius:12px;border:1.5px solid #d0d4da;
-  font-weight:700;font-size:12px;background:#fff;cursor:pointer;padding:0 4px;
-  line-height:1.3;text-align:center;
+  display:flex;align-items:center;justify-content:center;flex-direction:row;gap:8px;
+  width:100%;height:54px;border-radius:12px;border:1.5px solid #d0d4da;
+  font-weight:700;font-size:14px;background:#fff;cursor:pointer;padding:0 16px;
+  line-height:1.3;text-align:left;
 }
 .btn-icon{font-size:18px;line-height:1;}
 .btn-manual{background:#fff8e1;border-color:#ffe082;color:#7c5a00;}
@@ -326,34 +326,34 @@ document.getElementById("interactive").addEventListener("click", () => {
 document.getElementById("sleepOverlay").addEventListener("click", wakeUp);
 
 // ── Torch ──────────────────────────────────────────────────────────────
+// Safari on iOS does not expose torch via getCapabilities(),
+// but applyConstraints({advanced:[{torch}]}) may still work on some devices.
+// We show the button on all non-desktop platforms and let the API decide.
 function checkTorchSupport() {
-  let attempts = 0;
-  const interval = setInterval(() => {
-    const track = Quagga.CameraAccess.getActiveTrack();
-    if (track && track.getCapabilities) {
-      const caps = track.getCapabilities();
-      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      if (!isIOS && caps.torch) {
-        document.getElementById("torchBtn").style.display = "flex";
-        clearInterval(interval); return;
-      }
-    }
-    if (++attempts > 20) clearInterval(interval);
-  }, 300);
+  const isDesktop = !/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isDesktop) return; // no torch on desktop browsers
+  // Show immediately; if the device doesn't support it the click handler will hide it
+  document.getElementById("torchBtn").style.display = "flex";
 }
 
 document.getElementById("torchBtn").onclick = async function (e) {
   e.stopPropagation();
   const track = Quagga.CameraAccess.getActiveTrack();
   if (!track) return;
-  const caps = track.getCapabilities ? track.getCapabilities() : {};
-  if (!caps.torch) { console.warn("Torch not supported."); return; }
-  isTorchOn = !isTorchOn;
+  const next = !isTorchOn;
   try {
-    await track.applyConstraints({ advanced: [{ torch: isTorchOn }] });
+    await track.applyConstraints({ advanced: [{ torch: next }] });
+    isTorchOn = next;
   } catch {
-    try { await track.applyConstraints({ torch: isTorchOn }); }
-    catch (e2) { console.error("Torch failed:", e2); isTorchOn = !isTorchOn; return; }
+    try {
+      await track.applyConstraints({ torch: next });
+      isTorchOn = next;
+    } catch (e2) {
+      // Device truly doesn't support torch — hide button so it doesn't confuse user
+      console.warn("Torch not supported, hiding button.", e2);
+      this.style.display = "none";
+      return;
+    }
   }
   this.textContent = isTorchOn ? "💡" : "🔦";
   this.classList.toggle("on", isTorchOn);
