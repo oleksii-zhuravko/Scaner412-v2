@@ -14,33 +14,53 @@
 <script src="quagga.min.js"></script>
 <style>
 *{box-sizing:border-box;user-select:none;-webkit-tap-highlight-color:transparent;}
-html,body{margin:0;padding:0;height:100%;font-family:-apple-system,system-ui,sans-serif;background:#f0f2f5;}
-body{overflow-y:auto;overflow-x:hidden;}
+html{height:100%;}
+body{
+  margin:0;padding:0;
+  /* fill entire screen, block all scrolling */
+  height:100%;overflow:hidden;
+  font-family:-apple-system,system-ui,sans-serif;background:#f0f2f5;
+  /* respect iPhone notch/home bar */
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  padding-left:env(safe-area-inset-left);
+  padding-right:env(safe-area-inset-right);
+}
 
-.wrap{width:100%;max-width:620px;margin:0 auto;padding:10px 12px 24px;}
+.wrap{
+  width:100%;max-width:620px;margin:0 auto;
+  padding:10px 12px 12px;
+  /* fill viewport height minus safe areas */
+  height:100%;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
 
-/* Header */
-.header{display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
+/* ── Header ── */
+.header{flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
 .header h2{
   margin:0;font-size:22px;font-weight:700;color:#1a1a1a;
   font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase;
 }
-/* Shared pill style for counter + format toggle */
+
+/* ── Shared pill/badge ── */
 .badge{
   display:inline-flex;align-items:center;
   font-size:13px;font-weight:700;color:#fff;
-  background:#1a1a1a;border-radius:20px;padding:4px 12px;
+  background:#1a1a1a;border-radius:10px;padding:4px 12px;
   border:none;cursor:default;
 }
 .format-toggle{
   display:inline-flex;align-items:center;
-  font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;cursor:pointer;
+  font-size:13px;font-weight:700;padding:4px 12px;border-radius:10px;cursor:pointer;
   border:none;background:#6c757d;color:#fff;
 }
 .format-toggle.active{background:#007bff;}
-.camera-wrap{position:relative;margin-bottom:4px;}
+
+/* ── Camera ── */
+.camera-wrap{flex-shrink:0;position:relative;margin-bottom:4px;}
 #interactive.viewport{
-  width:100%;height:28vw;min-height:130px;max-height:200px;
+  width:100%;height:29.4vw;min-height:137px;max-height:210px;
   overflow:hidden;position:relative;
   background:#111;border-radius:14px;
   box-shadow:0 2px 8px rgba(0,0,0,.15);
@@ -61,7 +81,7 @@ body{overflow-y:auto;overflow-x:hidden;}
 #sleepOverlay .sleep-text{color:#fff;font-size:14px;font-weight:600;}
 #sleepOverlay .sleep-sub{color:rgba(255,255,255,.55);font-size:12px;}
 
-/* Torch button — floats over camera */
+/* Torch — floats over camera */
 #torchBtn{
   display:none;position:absolute;top:8px;right:8px;z-index:11;
   width:38px;height:38px;border-radius:10px;border:none;
@@ -72,14 +92,13 @@ body{overflow-y:auto;overflow-x:hidden;}
 #torchBtn.on{background:rgba(255,220,0,.8);color:#333;}
 
 /* Timer hint */
-.timer-hint{font-size:11px;color:#adb5bd;text-align:right;margin-bottom:8px;}
+.timer-hint{flex-shrink:0;font-size:11px;color:#adb5bd;text-align:right;margin-bottom:6px;}
 .timer-hint span{color:#6c757d;font-weight:600;}
 
-/* Main two-column area */
-.main-area{display:flex;gap:10px;align-items:stretch;height:229px;}
+/* ── List panel: fills remaining space ── */
+.list-panel{flex:1;min-height:0;position:relative;margin-bottom:8px;}
 
-/* List panel */
-.list-panel{flex:1;min-width:0;position:relative;}
+/* Badges float inside textarea top */
 .list-meta{
   position:absolute;top:8px;left:10px;right:10px;z-index:1;
   display:flex;justify-content:space-between;align-items:center;
@@ -87,6 +106,7 @@ body{overflow-y:auto;overflow-x:hidden;}
 }
 .list-meta .badge,
 .list-meta .format-toggle{pointer-events:auto;}
+
 textarea{
   display:block;width:100%;height:100%;
   padding:40px 12px 10px;border-radius:12px;border:1.5px solid #d0d4da;
@@ -94,11 +114,11 @@ textarea{
   user-select:text;font-family:monospace;
 }
 
-/* Actions panel */
-.actions{display:flex;flex-direction:column;gap:7px;width:104px;flex-shrink:0;}
+/* ── Buttons row below textarea ── */
+.actions{flex-shrink:0;display:flex;gap:8px;}
 .btn{
   display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;
-  width:100%;height:52px;border-radius:12px;border:1.5px solid #d0d4da;
+  flex:1;height:54px;border-radius:12px;border:1.5px solid #d0d4da;
   font-weight:700;font-size:12px;background:#fff;cursor:pointer;padding:0 4px;
   line-height:1.3;text-align:center;
 }
@@ -114,23 +134,18 @@ dialog{
   margin:0 auto;width:100%;max-width:620px;
   padding:0;border:none;border-radius:20px 20px 0 0;
   background:#fff;box-shadow:0 -4px 24px rgba(0,0,0,.18);
-  /* avoid native outline */
   outline:none;
+  padding-bottom:env(safe-area-inset-bottom);
 }
 dialog::backdrop{background:rgba(0,0,0,.4);}
-
-.dialog-inner{padding:20px 16px 32px;}
-.dialog-handle{
-  width:40px;height:4px;border-radius:2px;background:#d0d4da;
-  margin:0 auto 16px;
-}
+.dialog-inner{padding:20px 16px 24px;}
+.dialog-handle{width:40px;height:4px;border-radius:2px;background:#d0d4da;margin:0 auto 16px;}
 .dialog-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:14px;text-align:center;}
 .dialog-input-row{display:flex;gap:8px;}
 #manualInput{
   flex:1;min-width:0;font-size:22px;padding:12px 14px;
   border-radius:12px;border:1.5px solid #d0d4da;background:#f8f9fa;
-  user-select:text;outline:none;transition:border-color .15s;
-  letter-spacing:2px;
+  user-select:text;outline:none;transition:border-color .15s;letter-spacing:2px;
 }
 #manualInput:focus{border-color:#007bff;background:#fff;}
 #dialogAddBtn{
@@ -145,7 +160,7 @@ dialog::backdrop{background:rgba(0,0,0,.4);}
   background:#f8f9fa;color:#495057;font-size:14px;font-weight:600;cursor:pointer;
 }
 
-.credits{text-align:center;font-size:10px;color:#bbb;margin-top:14px;}
+.credits{flex-shrink:0;text-align:center;font-size:10px;color:#bbb;margin-top:6px;}
 </style>
 </head>
 <body>
@@ -167,20 +182,19 @@ dialog::backdrop{background:rgba(0,0,0,.4);}
 
   <div class="timer-hint" id="timerHint">Автопауза через <span id="timerCountdown">30</span> с</div>
 
-  <div class="main-area">
-    <div class="list-panel">
-      <div class="list-meta">
-        <div class="badge" id="counter">0 кодів</div>
-        <div id="formatToggle" class="format-toggle">Стовпчик</div>
-      </div>
-      <textarea id="result" readonly placeholder="Тут з'являться відскановані коди..."></textarea>
+  <div class="list-panel">
+    <div class="list-meta">
+      <div class="badge" id="counter">0 кодів</div>
+      <div id="formatToggle" class="format-toggle">Стовпчик</div>
     </div>
-    <div class="actions">
-      <button class="btn btn-manual"  id="manualBtn"> <span class="btn-icon">✏️</span>Вручну</button>
-      <button class="btn btn-undo"    id="undoBtn">   <span class="btn-icon">↩</span>Назад</button>
-      <button class="btn btn-copy"    id="copyBtn">   <span class="btn-icon">📋</span>Копіювати</button>
-      <button class="btn btn-clear"   id="clearAllBtn"><span class="btn-icon">🗑</span>Очистити</button>
-    </div>
+    <textarea id="result" readonly placeholder="Тут з'являться відскановані коди..."></textarea>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-manual"  id="manualBtn"> <span class="btn-icon">✏️</span>Вручну</button>
+    <button class="btn btn-undo"    id="undoBtn">   <span class="btn-icon">↩</span>Назад</button>
+    <button class="btn btn-copy"    id="copyBtn">   <span class="btn-icon">📋</span>Копіювати</button>
+    <button class="btn btn-clear"   id="clearAllBtn"><span class="btn-icon">🗑</span>Очистити</button>
   </div>
 
   <div class="credits">Created by Oleksii Zhuravko, idea Vitalii Tupchienko</div>
