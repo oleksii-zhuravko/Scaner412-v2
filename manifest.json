@@ -1,0 +1,19 @@
+{
+  "name": "Сканер 412",
+  "short_name": "Сканер",
+  "description": "Офлайн сканер штрих-кодів",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#007bff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon412.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
