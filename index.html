@@ -319,14 +319,6 @@ function wakeUp() {
   isSleeping = false;
   document.getElementById("sleepOverlay").classList.remove("active");
   startQuagga();
-  // ДІАГНОСТИКА — прибрати після тесту
-setTimeout(() => {
-  const track = Quagga.CameraAccess.getActiveTrack();
-  if (!track) { alert("Трек не знайдено"); return; }
-  const caps = JSON.stringify(track.getCapabilities(), null, 2);
-  const settings = JSON.stringify(track.getSettings(), null, 2);
-  alert("CAPS:\n" + caps + "\n\nSETTINGS:\n" + settings);
-}, 3000);
 }
 
 document.getElementById("interactive").addEventListener("click", () => {
